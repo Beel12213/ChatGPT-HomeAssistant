@@ -1,0 +1,45 @@
+blueprint:
+  name: Activate Lights Based on Motion and Illuminance or Illuminance and Another Active Device
+  description: Activates lights in a chosen room based on motion and illuminance, or illuminance and another active device.
+  domain: automation
+  input:
+    room:
+      name: Room
+      description: Room where the lights are located
+      selector:
+        entity:
+          domain: light
+    motion_sensor:
+      name: Motion Sensor
+      description: Motion sensor that triggers the automation
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: motion
+    illuminance_sensor:
+      name: Illuminance Sensor
+      description: Sensor that measures the illuminance level
+      selector:
+        entity:
+          domain: sensor
+          device_class: illuminance
+    other_device:
+      name: Other Device
+      description: Device that is also required to be active for the automation to trigger
+      selector:
+        entity:
+  trigger:
+    - platform: state
+      entity_id: !input 'motion_sensor'
+      to: 'on'
+    - platform: state
+      entity_id: !input 'illuminance_sensor'
+      above: 50
+  condition:
+    - condition: state
+      entity_id: !input 'other_device'
+      state: 'on'
+  action:
+    - service: light.turn_on
+      data:
+        entity_id: !input 'room'
